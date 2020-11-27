@@ -1,0 +1,24 @@
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.header-logo {
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+
+.header-links {
+    
+}
+.header-links ul{
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.header-links ul li{
+    
+}

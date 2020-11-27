@@ -63,7 +63,7 @@ module.exports = {
     mode: 'development',
     entry: {
         main: ['@babel/polyfill', './index.js'],
-        analytics: './analytics.ts',
+        // analytics: './analytics.ts',
     },
     output: {
         filename: filename('js'),
@@ -72,14 +72,14 @@ module.exports = {
     resolve: {
         extensions: ['.js', '.json'],
         alias: {
-            '@models': path.resolve(__dirname, 'src/models'),
+            '@models': path.resolve(__dirname, 'src/js'),
             '@': path.resolve(__dirname, 'src'),
         },
     },
     devServer: {
         port: 4200,
         open: true,
-        hot: isDev,
+        hot: true,
     },
     plugins: [
         new HTMLWebpackPlugin({
