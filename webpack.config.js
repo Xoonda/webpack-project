@@ -6,10 +6,8 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OptimizeCssAssetWebpackPlugin = require('optimize-css-assets-webpack-plugin');
 const TerserWebpackPlugin = require('terser-webpack-plugin');
 
-
 const isDev = process.env.NODE_ENV === 'development';
 const isProd = !isDev;
-
 const optimization = () => {
     const config = {
         splitChunks: {
@@ -26,15 +24,46 @@ const optimization = () => {
 }
 
 const filename = ext => isDev ? `[name].${ext}` : `[name].[hash].${ext}`;
-
 console.log('is Dev:', isDev);
+
+const cssLoaders = (extra) => {
+    const loaders = [
+        {
+            loader: MiniCssExtractPlugin.loader,
+            options: {
+                publicPath: (resourcePath, context) => 
+                {
+                    return path.relative(path.dirname(resourcePath), context) + '/';
+                
+                },
+            },
+        },
+            'css-loader'
+    ]
+    if(extra) {
+        loaders.push(extra);
+    }
+    return loaders;
+}
+
+const babelOptions = preset => {
+    const opts = {
+        presets: ['@babel/preset-env'],
+        plugins: ['@babel/plugin-proposal-class-properties'],
+    }
+
+    if(preset) {
+        opts.presets.push(preset);
+    }
+    return opts
+}
 
 module.exports = {
     context: path.resolve(__dirname, 'src'),
     mode: 'development',
     entry: {
-        main: './index.js',
-        analytics: './analytics.js',
+        main: ['@babel/polyfill', './index.js'],
+        analytics: './analytics.ts',
     },
     output: {
         filename: filename('js'),
@@ -76,57 +105,41 @@ module.exports = {
     module: {
         rules: [
             {
+                test: /\.m?js$/,
+                exclude: /node_modules/,
+                use: {
+                  loader: 'babel-loader',
+                  options:babelOptions(),
+                }
+            },
+            {
+                test: /\.ts$/,
+                exclude: /node_modules/,
+                use: {
+                  loader: 'babel-loader',
+                  options: babelOptions('@babel/preset-typescript'),
+                }
+            },
+            // {
+            //     test: /\.jsx$/,
+            //     exclude: /node_modules/,
+            //     use: {
+            //       loader: 'babel-loader',
+            //       options: babelOptions('@babel/preset-react'),
+            //     }
+            // },
+            {
                 test: /\.css$/,
-                use: 
-                [
-                    {
-                        loader: MiniCssExtractPlugin.loader,
-                        options: {
-                            publicPath: (resourcePath, context) => 
-                            {
-                                return path.relative(path.dirname(resourcePath), context) + '/';
-                            
-                            },
-                        },
-                    },
-                        'css-loader'
-                ]
+                use: cssLoaders(),
+                
             },
             {
                 test: /\.less$/,
-                use: 
-                [
-                    {
-                        loader: MiniCssExtractPlugin.loader,
-                        options: {
-                            publicPath: (resourcePath, context) => 
-                            {
-                                return path.relative(path.dirname(resourcePath), context) + '/';
-                            
-                            },
-                        },
-                    },
-                        'css-loader',
-                        'less-loader',
-                ]
+                use: cssLoaders('less-loader'),
             },
             {
                 test: /\.s[a|c]ss$/,
-                use: 
-                [
-                    {
-                        loader: MiniCssExtractPlugin.loader,
-                        options: {
-                            publicPath: (resourcePath, context) => 
-                            {
-                                return path.relative(path.dirname(resourcePath), context) + '/';
-                            
-                            },
-                        },
-                    },
-                        'css-loader',
-                        'sass-loader',
-                ]
+                use: cssLoaders('sass-loader'),
             },
             {
                 test: /\.(png|svg|jpg|gif)$/,
